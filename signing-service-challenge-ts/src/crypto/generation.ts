@@ -1,4 +1,9 @@
-import crypto, { ECKeyPairOptions, RSAKeyPairOptions, KeyFormat } from "crypto";
+import crypto, {
+  ECKeyPairOptions,
+  RSAKeyPairOptions,
+  KeyFormat,
+  KeyObject,
+} from "crypto";
 import { Algorithm } from "./signer";
 
 export interface KeyPair {
@@ -7,7 +12,7 @@ export interface KeyPair {
 }
 
 export const generateEcKeyPair = (): Promise<KeyPair> => {
-  const options: ECKeyPairOptions<KeyFormat, KeyFormat> = {
+  const options: ECKeyPairOptions<"der", "der"> = {
     namedCurve: "secp256k1",
     publicKeyEncoding: {
       type: "spki",
@@ -29,13 +34,9 @@ export const generateEcKeyPair = (): Promise<KeyPair> => {
         }
 
         const keyPair: KeyPair = {
-          public: publicKey.toString(),
-          private: privateKey.toString(),
+          public: publicKey.toString("base64"),
+          private: privateKey.toString("base64"),
         };
-        // const keyPair: CryptoKeyPair = {
-        //   public: publicKey,
-        //   private: privateKey,
-        // };
         console.log(`Created EC key pair: ${keyPair}`);
         resolve(keyPair);
       });
@@ -47,7 +48,7 @@ export const generateEcKeyPair = (): Promise<KeyPair> => {
 };
 
 export const generateRsaKeyPair = (): Promise<KeyPair> => {
-  const options: RSAKeyPairOptions<KeyFormat, KeyFormat> = {
+  const options: RSAKeyPairOptions<"der", "der"> = {
     modulusLength: 2048,
     publicExponent: 0x10101,
     publicKeyEncoding: {
@@ -66,14 +67,17 @@ export const generateRsaKeyPair = (): Promise<KeyPair> => {
     try {
       crypto.generateKeyPair("rsa", options, (err, publicKey, privateKey) => {
         if (err) {
-          console.log(
-            `Encountered an error during RSA key pair generation: ${err.message}`
+          reject(
+            new Error(
+              `Encountered an error during RSA key pair generation: ${err.message}`
+            )
           );
+          return;
         }
 
         const keyPair: KeyPair = {
-          public: publicKey.toString(),
-          private: privateKey.toString(),
+          public: publicKey.toString("base64"),
+          private: privateKey.toString("base64"),
         };
         console.log(`Created RSA key pair: ${keyPair}`);
         resolve(keyPair);

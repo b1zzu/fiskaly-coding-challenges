@@ -90,7 +90,7 @@ server.post("/device", async (req, res) => {
       id: device.getId(),
       algorithm: device.getAlgorithm(),
       label: device.getLabel(),
-      publicKey: Buffer.from(device.getPublicKey()).toString("base64"),
+      publicKey: device.getPublicKey(),
     })
   );
 });
