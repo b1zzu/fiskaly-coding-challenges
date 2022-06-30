@@ -93,7 +93,7 @@ export default async function generateKeyPair(
   algorithm: Algorithm
 ): Promise<KeyPair> {
   switch (algorithm) {
-    case Algorithm.ECC:
+    case Algorithm.EC:
       return generateEcKeyPair();
     case Algorithm.RSA:
       return generateRsaKeyPair();

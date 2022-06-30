@@ -1,7 +1,7 @@
 import bodyParser from "body-parser";
 import express, { Response } from "express";
 import generateKeyPair from "../crypto/generation";
-import { Algorithm } from "../crypto/signer";
+import sign, { Algorithm } from "../crypto/signer";
 import { Device } from "../domain/device";
 
 const server = express();
@@ -54,7 +54,7 @@ server.post("/device", async (req, res) => {
     return error(res, 400, "algorithm is not a string");
   }
   if (!isAlgorithm(algorithm)) {
-    return error(res, 400, "algorithm is not ECC or RSA");
+    return error(res, 400, "algorithm is not EC or RSA");
   }
 
   // Validate the label
@@ -91,6 +91,62 @@ server.post("/device", async (req, res) => {
       algorithm: device.getAlgorithm(),
       label: device.getLabel(),
       publicKey: device.getPublicKey(),
+    })
+  );
+});
+
+server.post("/device/:id/sign", async (req, res) => {
+  const id: string = req.params.id;
+  const data: any = req.body.data;˝
+
+  // Validate the id
+  if (id === undefined) {
+    return error(res, 400, "id is undefined");
+  }
+
+  // Validate the data to sign
+  if (id === undefined) {
+    return error(res, 400, "data is undefined");
+  }
+  if (!isString(data)) {
+    return error(res, 400, "data is not a string");
+  }
+  if (data.length === 0) {
+    return error(res, 400, "data is empty");
+  }
+
+  // Retrieve the device by id
+  const device = Device.findById(id);
+  if (device === null) {
+    return error(res, 400, `the deice with the id: '${id}' does not exists`);
+  }
+
+  // Prepare the data to be signed
+  const encodedData = Buffer.from(data, "utf-8").toString("base64");
+  const signatureCounter = device.getSignatureCounter();
+  const lastSignature =
+    device.getLastSignature() ||
+    Buffer.from(device.getId(), "utf-8").toString("base64");
+
+  const dataToBeSign = `${signatureCounter}_${encodedData}_${lastSignature}`;
+
+  // Sign the data
+  const signature = sign(
+    device.getAlgorithm(),
+    dataToBeSign,
+    device.getPrivateKey()
+  );
+
+  // Update the device counter and last signature
+  device.incrementSignatureCounter();
+  device.setLastSignature(signature);
+  device.update();
+
+  res.status(200);
+  res.send(
+    JSON.stringify({
+      signature: signature,
+      signed_data: dataToBeSign,
     })
   );
 });
