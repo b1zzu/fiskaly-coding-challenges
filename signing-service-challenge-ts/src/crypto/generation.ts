@@ -1,4 +1,5 @@
-import crypto, { ECKeyPairOptions, RSAKeyPairOptions, KeyFormat } from 'crypto';
+import crypto, { ECKeyPairOptions, RSAKeyPairOptions, KeyFormat } from "crypto";
+import { Algorithm } from "./signer";
 
 export interface KeyPair {
   public: string;
@@ -7,22 +8,24 @@ export interface KeyPair {
 
 export const generateEcKeyPair = (): Promise<KeyPair> => {
   const options: ECKeyPairOptions<KeyFormat, KeyFormat> = {
-    namedCurve: 'secp256k1',
+    namedCurve: "secp256k1",
     publicKeyEncoding: {
-      type: 'spki',
-      format: 'der'
+      type: "spki",
+      format: "der",
     },
     privateKeyEncoding: {
-      type: 'pkcs8',
-      format: 'der'
-    }
+      type: "pkcs8",
+      format: "der",
+    },
   };
 
   return new Promise<KeyPair>((resolve, reject) => {
     try {
-      crypto.generateKeyPair('ec', options, (err, publicKey, privateKey) => {
+      crypto.generateKeyPair("ec", options, (err, publicKey, privateKey) => {
         if (err) {
-          console.log(`Encountered an error during EC key pair generation: ${err.message}`);
+          console.log(
+            `Encountered an error during EC key pair generation: ${err.message}`
+          );
         }
 
         const keyPair: KeyPair = {
@@ -41,29 +44,31 @@ export const generateEcKeyPair = (): Promise<KeyPair> => {
       reject(e);
     }
   });
-}
+};
 
 export const generateRsaKeyPair = (): Promise<KeyPair> => {
   const options: RSAKeyPairOptions<KeyFormat, KeyFormat> = {
     modulusLength: 2048,
     publicExponent: 0x10101,
     publicKeyEncoding: {
-      type: 'pkcs1',
-      format: 'der'
+      type: "pkcs1",
+      format: "der",
     },
     privateKeyEncoding: {
-      type: 'pkcs8',
-      format: 'der',
-      cipher: 'aes-192-cbc',
-      passphrase: 'fiskaly is AWESOME'
-    }
+      type: "pkcs8",
+      format: "der",
+      cipher: "aes-192-cbc",
+      passphrase: "fiskaly is AWESOME",
+    },
   };
 
   return new Promise<KeyPair>((resolve, reject) => {
     try {
-      crypto.generateKeyPair('rsa', options, (err, publicKey, privateKey) => {
+      crypto.generateKeyPair("rsa", options, (err, publicKey, privateKey) => {
         if (err) {
-          console.log(`Encountered an error during RSA key pair generation: ${err.message}`);
+          console.log(
+            `Encountered an error during RSA key pair generation: ${err.message}`
+          );
         }
 
         const keyPair: KeyPair = {
@@ -78,8 +83,15 @@ export const generateRsaKeyPair = (): Promise<KeyPair> => {
       reject(e);
     }
   });
-}
+};
 
-export default function generateKeyPair() {
-  // TODO: implement key pair generation
+export default async function generateKeyPair(
+  algorithm: Algorithm
+): Promise<KeyPair> {
+  switch (algorithm) {
+    case Algorithm.ECC:
+      return generateEcKeyPair();
+    case Algorithm.RSA:
+      return generateRsaKeyPair();
+  }
 }

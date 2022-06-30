@@ -1,5 +1,6 @@
 import bodyParser from "body-parser";
 import express, { Response } from "express";
+import generateKeyPair from "../crypto/generation";
 import { Algorithm } from "../crypto/signer";
 import { Device } from "../domain/device";
 
@@ -17,7 +18,10 @@ server.get("/health", (req, res) => {
   );
 });
 
-server.post("/device", (req, res) => {
+/**
+ * Create Device
+ */
+server.post("/device", async (req, res) => {
   const id: any = req.body.id;
   const algorithm: any = req.body.algorithm;
   let label: any = req.body.label;
@@ -74,10 +78,11 @@ server.post("/device", (req, res) => {
     return error(res, 400, "a device with the same id already exists");
   }
 
-  // TODO: Generate the keys
+  // Generate the Public/Private keys
+  const key = await generateKeyPair(algorithm);
 
   // Store the new device
-  const device = Device.create(id, algorithm, label);
+  const device = Device.create(id, algorithm, label, key.public, key.private);
 
   res.status(200);
   res.send(
@@ -85,7 +90,7 @@ server.post("/device", (req, res) => {
       id: device.getId(),
       algorithm: device.getAlgorithm(),
       label: device.getLabel(),
-      publicKey: "todo",
+      publicKey: Buffer.from(device.getPublicKey()).toString("base64"),
     })
   );
 });

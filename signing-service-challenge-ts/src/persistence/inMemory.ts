@@ -6,6 +6,8 @@ export interface DeviceEntry {
   label: string | null;
   signatureCounter: number;
   lastSignature: string | null;
+  publicKey: string;
+  privateKey: string;
 }
 
 class DeviceStorage {

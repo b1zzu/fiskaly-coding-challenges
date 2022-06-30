@@ -7,19 +7,25 @@ export class Device {
   private label: string | null;
   private signatureCounter: number;
   private lastSignature: string | null;
+  private publicKey: string;
+  private privateKey: string;
 
   private constructor(
     id: string,
     algorithm: Algorithm,
     label: string | null,
     signatureCounter: number,
-    lastSignature: string | null
+    lastSignature: string | null,
+    publicKey: string,
+    privateKey: string
   ) {
     this.id = id;
     this.algorithm = algorithm;
     this.label = label;
     this.signatureCounter = signatureCounter;
     this.lastSignature = lastSignature;
+    this.publicKey = publicKey;
+    this.privateKey = privateKey;
   }
 
   public getId(): string {
@@ -67,13 +73,23 @@ export class Device {
     return this.lastSignature;
   }
 
+  public getPublicKey(): string {
+    return this.publicKey;
+  }
+
+  public getPrivateKey(): string {
+    return this.privateKey;
+  }
+
   private static fromDeviceEntry(entry: DeviceEntry): Device {
     return new Device(
       entry.id,
       entry.algorithm,
       entry.label,
       entry.signatureCounter,
-      entry.lastSignature
+      entry.lastSignature,
+      entry.publicKey,
+      entry.privateKey
     );
   }
 
@@ -89,7 +105,9 @@ export class Device {
   public static create(
     id: string,
     algorithm: Algorithm,
-    label?: string
+    label: string | undefined,
+    publicKey: string,
+    privateKey: string
   ): Device {
     const entry: DeviceEntry = {
       id,
@@ -97,6 +115,8 @@ export class Device {
       label: label || null,
       signatureCounter: 0,
       lastSignature: null,
+      publicKey,
+      privateKey,
     };
 
     // store the device as new
@@ -133,6 +153,8 @@ export class Device {
       label: this.label,
       signatureCounter: this.signatureCounter,
       lastSignature: this.lastSignature,
+      publicKey: this.publicKey,
+      privateKey: this.privateKey,
     };
 
     deviceStorage.update(entry);
