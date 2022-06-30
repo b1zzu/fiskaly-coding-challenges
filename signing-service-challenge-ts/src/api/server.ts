@@ -97,7 +97,7 @@ server.post("/device", async (req, res) => {
 
 server.post("/device/:id/sign", async (req, res) => {
   const id: string = req.params.id;
-  const data: any = req.body.data;˝
+  const data: any = req.body.data;
 
   // Validate the id
   if (id === undefined) {
