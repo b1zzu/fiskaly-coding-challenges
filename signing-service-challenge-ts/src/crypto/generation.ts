@@ -37,7 +37,6 @@ export const generateEcKeyPair = (): Promise<KeyPair> => {
           public: publicKey.toString("base64"),
           private: privateKey.toString("base64"),
         };
-        console.log(`Created EC key pair: ${keyPair}`);
         resolve(keyPair);
       });
     } catch (e) {
@@ -79,7 +78,6 @@ export const generateRsaKeyPair = (): Promise<KeyPair> => {
           public: publicKey.toString("base64"),
           private: privateKey.toString("base64"),
         };
-        console.log(`Created RSA key pair: ${keyPair}`);
         resolve(keyPair);
       });
     } catch (e) {
@@ -89,9 +87,7 @@ export const generateRsaKeyPair = (): Promise<KeyPair> => {
   });
 };
 
-export default async function generateKeyPair(
-  algorithm: Algorithm
-): Promise<KeyPair> {
+export async function generateKeyPair(algorithm: Algorithm): Promise<KeyPair> {
   switch (algorithm) {
     case Algorithm.EC:
       return generateEcKeyPair();

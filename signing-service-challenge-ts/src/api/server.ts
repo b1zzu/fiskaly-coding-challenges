@@ -1,8 +1,10 @@
 import bodyParser from "body-parser";
 import express, { Response } from "express";
-import generateKeyPair from "../crypto/generation";
-import sign, { Algorithm } from "../crypto/signer";
+import { generateKeyPair } from "../crypto/generation";
+import { Algorithm, sign, verify } from "../crypto/signer";
 import { Device } from "../domain/device";
+import crypto from "crypto";
+import { isDataView } from "util/types";
 
 const server = express();
 
@@ -90,7 +92,7 @@ server.post("/device", async (req, res) => {
       id: device.getId(),
       algorithm: device.getAlgorithm(),
       label: device.getLabel(),
-      publicKey: device.getPublicKey(),
+      public_key: device.getPublicKey(),
     })
   );
 });
@@ -105,7 +107,7 @@ server.post("/device/:id/sign", async (req, res) => {
   }
 
   // Validate the data to sign
-  if (id === undefined) {
+  if (data === undefined) {
     return error(res, 400, "data is undefined");
   }
   if (!isString(data)) {
@@ -147,6 +149,55 @@ server.post("/device/:id/sign", async (req, res) => {
     JSON.stringify({
       signature: signature,
       signed_data: dataToBeSign,
+    })
+  );
+});
+
+server.post("/device/:id/verify", async (req, res) => {
+  const id: string = req.params.id;
+  const signature: any = req.body.signature;
+  const signedData: any = req.body.signed_data;
+
+  // Validate the id
+  if (id === undefined) {
+    return error(res, 400, "id is undefined");
+  }
+
+  // Validate signature
+  if (signature === undefined) {
+    return error(res, 400, "signature is undefined");
+  }
+  if (!isString(signature)) {
+    return error(res, 400, "signature is not a string");
+  }
+  if (signature.length === 0) {
+    return error(res, 400, "signature is empty");
+  }
+
+  // Validate signed_data
+  if (signedData === undefined) {
+    return error(res, 400, "signed_data is undefined");
+  }
+  if (!isString(signedData)) {
+    return error(res, 400, "signed_data is not a string");
+  }
+  if (signedData.length === 0) {
+    return error(res, 400, "signed_data is empty");
+  }
+
+  // Retrieve the device by id
+  const device = Device.findById(id);
+  if (device === null) {
+    return error(res, 400, `the deice with the id: '${id}' does not exists`);
+  }
+
+  // Verify the signature
+  const isValid = verify(device.getAlgorithm(), signedData, signature, device.getPublicKey());
+
+  res.status(200);
+  res.send(
+    JSON.stringify({
+      is_valid: isValid,
     })
   );
 });
