@@ -1,26 +1,26 @@
-name: Signed Service Challange TS CI
+name: Signed Service Challenge TS CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    
+
     defaults:
       run:
         working-directory: ./signing-service-challenge-ts
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js 16.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16.x
-        cache: 'npm'
-    - run: npm ci
-    - run: npm test
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: npm
+          cache-dependency-path: signing-service-challenge-ts/package-lock.json
+      - run: npm ci
+      - run: npm test
