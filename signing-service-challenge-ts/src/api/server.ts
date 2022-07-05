@@ -3,8 +3,6 @@ import express, { Response } from "express";
 import { generateKeyPair } from "../crypto/generation";
 import { Algorithm, sign, verify } from "../crypto/signer";
 import { Device } from "../domain/device";
-import crypto from "crypto";
-import { isDataView } from "util/types";
 
 const server = express();
 
@@ -35,8 +33,8 @@ server.post("/device", async (req, res) => {
   if (!isString(id)) {
     return error(res, 400, "id is not a string");
   }
-  if (id.length < 4 || id.length > 16) {
-    return error(res, 400, "the id must be min 4 characters and max 16");
+  if (id.length < 4 || id.length > 64) {
+    return error(res, 400, "the id must be min 4 characters and max 64");
   }
   if (!id.match(/^^[a-zA-z]-?([a-zA-z0-9]+-?)*[a-zA-z0-9]$/)) {
     return error(
@@ -70,8 +68,8 @@ server.post("/device", async (req, res) => {
       label = undefined;
     }
 
-    if (label.length > 64) {
-      return error(res, 400, "the label must be max 64 characters");
+    if (label.length > 256) {
+      return error(res, 400, "the label must be max 256 characters");
     }
   }
 
