@@ -10,7 +10,7 @@ export interface DeviceEntry {
   privateKey: string;
 }
 
-class DeviceStorage {
+export class DeviceStorage {
   /**
    * The created devices array
    */

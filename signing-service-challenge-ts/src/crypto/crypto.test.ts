@@ -2,7 +2,7 @@ import { assert } from "chai";
 import { generateKeyPair } from "./generation";
 import { Algorithm, sign, verify } from "./signer";
 
-describe("crypto", () => {
+describe("Crypto", () => {
   it("test sign and verify with RSA key", async () => {
     const pair = await generateKeyPair(Algorithm.RSA);
 
